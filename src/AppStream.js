@@ -14,42 +14,42 @@ const App = () => {
     ws.onopen = () => console.log('WebSocket connected!');
     ws.onclose = () => console.log('WebSocket connection closed.');
 
-    // function handleAudioData(event) {
-    //   const receivedAudioData = event.data;
-    //   console.log("Raw audio data received:", receivedAudioData);
+    function handleAudioData(event) {
+      const receivedAudioData = event.data;
+      console.log("Raw audio data received:", receivedAudioData);
     
-    //   // 如果收到的数据是 Blob 类型，转换为 ArrayBuffer
-    //   if (receivedAudioData instanceof Blob) {
-    //     receivedAudioData.arrayBuffer()
-    //       .then((buffer) => {
-    //         // 如果需要调试，查看 ArrayBuffer 数据
-    //         console.log("ArrayBuffer data:", buffer);
+      // 如果收到的数据是 Blob 类型，转换为 ArrayBuffer
+      if (receivedAudioData instanceof Blob) {
+        receivedAudioData.arrayBuffer()
+          .then((buffer) => {
+            // 如果需要调试，查看 ArrayBuffer 数据
+            console.log("ArrayBuffer data:", buffer);
     
-    //         // 将 ArrayBuffer 转换为 Float32Array
-    //         const pcmData = new Float32Array(buffer);
+            // 将 ArrayBuffer 转换为 Float32Array
+            const pcmData = new Float32Array(buffer);
     
-    //         // 打印前10个值
-    //         console.log("PCM data (first 10 values):", pcmData.slice(0, 10));
+            // 打印前10个值
+            console.log("PCM data (first 10 values):", pcmData.slice(0, 10));
     
-    //         // 使用 Web Audio API 播放音频
-    //         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    //         const bufferAudio = audioContext.createBuffer(1, pcmData.length, 44100);  // 假设采样率为 44100
-    //         bufferAudio.getChannelData(0).set(pcmData);
+            // 使用 Web Audio API 播放音频
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const bufferAudio = audioContext.createBuffer(1, pcmData.length, 44100);  // 假设采样率为 44100
+            bufferAudio.getChannelData(0).set(pcmData);
     
-    //         const source = audioContext.createBufferSource();
-    //         source.buffer = bufferAudio;
-    //         source.connect(audioContext.destination);
-    //         source.start();
-    //       })
-    //       .catch((error) => {
-    //         console.error("Error processing audio Blob:", error);
-    //       });
-    //   } else {
-    //     console.error("Received audio data is not a Blob:", receivedAudioData);
-    //   }
-    // }
+            const source = audioContext.createBufferSource();
+            source.buffer = bufferAudio;
+            source.connect(audioContext.destination);
+            source.start();
+          })
+          .catch((error) => {
+            console.error("Error processing audio Blob:", error);
+          });
+      } else {
+        console.error("Received audio data is not a Blob:", receivedAudioData);
+      }
+    }
     
-    // ws.onmessage = handleAudioData;
+    ws.onmessage = handleAudioData;
 
 
     setSocket(ws);

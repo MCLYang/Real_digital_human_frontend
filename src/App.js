@@ -7,7 +7,7 @@ const App = () => {
   const [processor, setProcessor] = useState(null);
   const [audioData, setAudioData] = useState(null);
 
-  // 创建 WebSocket 连接
+  // 创建 WebSocket 连接 a
   const initWebSocket = () => {
     const ws = new WebSocket('ws://localhost:8765');
 

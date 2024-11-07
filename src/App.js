@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import VideoUploadComponent from './components/VideoUploadComponent';
 import './App.css';
 
 const App = () => {
@@ -138,7 +139,7 @@ const App = () => {
       {/* 下半部分，功能区 */}
       <div className="bottom">
         <div className="button-row">
-          <button onClick={uploadVideo}>上传视频</button>
+        <VideoUploadComponent />
           <button onClick={startLive} disabled={isLive}>开始直播</button>
           <button onClick={pauseLive} disabled={!isLive}>暂停直播</button>
         </div>

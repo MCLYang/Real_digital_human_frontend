@@ -153,19 +153,6 @@ const App = () => {
           <button onClick={downloadStream}>下载直播</button>
         </div>
       </div>
-
-      {/* 显示音频数据 */}
-      <div className="audio-data-container">
-        <h4>接收到的音频数据:</h4>
-        {audioData ? (
-          <audio controls preload="auto">
-            <source src={audioData} type="audio/wav" />
-            您的浏览器不支持音频播放。
-          </audio>
-        ) : (
-          <p>等待音频数据...</p>
-        )}
-      </div>
     </div>
   );
 };

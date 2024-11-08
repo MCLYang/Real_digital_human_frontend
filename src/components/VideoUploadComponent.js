@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Button } from '@tremor/react';
-
+import { Button } from '@chakra-ui/react';
 
 function VideoUploadComponent() {
   const [videoFile, setVideoFile] = useState(null);
@@ -44,14 +43,14 @@ function VideoUploadComponent() {
       alert("上传出错！");
     }
   };
-  
+
 
   return (
     
     <div className="video-upload">
       <input type="file" accept="video/*" onChange={handleFileChange} />
-      <Button color="indigo" onClick={uploadVideo}>
-        上传视频
+      <Button colorScheme="teal"  onClick={uploadVideo} size="lg">
+       上传视频
       </Button>
     </div>
     

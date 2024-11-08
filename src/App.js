@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import VideoUploadComponent from './components/VideoUploadComponent';
 import './App.css';
-
+import { Button } from '@chakra-ui/react';
 const App = () => {
   const [isLive, setIsLive] = useState(false);
   const [socket, setSocket] = useState(null);
@@ -140,8 +140,12 @@ const App = () => {
       <div className="bottom">
         <div className="button-row">
         <VideoUploadComponent />
-          <button onClick={startLive} disabled={isLive}>开始直播</button>
-          <button onClick={pauseLive} disabled={!isLive}>暂停直播</button>
+        <Button colorScheme="teal"  onClick={startLive} disabled={isLive} size="lg">
+          开始直播
+        </Button>
+        <Button colorScheme="teal"  onClick={pauseLive} disabled={!isLive} size="lg">
+          暂停直播
+        </Button>
         </div>
 
         <div className="button-row">
@@ -150,7 +154,9 @@ const App = () => {
             <option value="voice1">音色1</option>
             <option value="voice2">音色2</option>
           </select>
-          <button onClick={downloadStream}>下载直播</button>
+          <Button colorScheme="teal"  onClick={downloadStream} size="lg">
+          下载直播
+        </Button>
         </div>
       </div>
     </div>

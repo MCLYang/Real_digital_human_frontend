@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import VideoUploadComponent from './components/VideoUploadComponent';
+import AudioRecorder from './components/AudioRecorder';
 import './App.css';
 import { Button } from '@chakra-ui/react';
 const App = () => {
@@ -11,7 +12,12 @@ const App = () => {
   const [audioData, setAudioData] = useState(null);
   const [liveTime, setLiveTime] = useState(0);  // 用于存储直播时间
   const [statusMessage, setStatusMessage] = useState('');  // 用于显示“开始直播”或“暂停直播”的状态信息
+  const [conversationId, setConversationId] = useState(null);
 
+  const handleConversationId = (id) => {
+    setConversationId(id);
+    console.log('Received Conversation ID:', id);
+  };
   useEffect(() => {
     let timer;
     if (isLive) {
@@ -125,15 +131,13 @@ const App = () => {
         <div className="info-container">
           <h3>直播时间: {formatTime(liveTime)}</h3>
           <p>{statusMessage}</p>
+          <p>当前会话 ID: {conversationId || '尚未创建'}</p>
+          <AudioRecorder onConversationId={handleConversationId} />
         </div>
 
         {/* 右侧播放视频 */}
-        <div className="video-container">
-          <video width="100%" height="100%" autoPlay controls>
-            <source src="static/2.mp4" type="video/mp4" />
-            您的浏览器不支持播放该视频。
-          </video>
-        </div>
+      <div className="video-container">
+      </div>
       </div>
 
       {/* 下半部分，功能区 */}
@@ -147,7 +151,6 @@ const App = () => {
           暂停直播
         </Button>
         </div>
-
         <div className="button-row">
           <select onChange={handleAudioSelect}>
             <option value="default">选择音色</option>

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import VideoUploadComponent from './components/VideoUploadComponent';
+import AudioRecorder from './components/AudioRecorder';
 import './App.css';
-
+import { Button } from '@chakra-ui/react';
 const App = () => {
   const [isLive, setIsLive] = useState(false);
   const [socket, setSocket] = useState(null);
@@ -8,37 +10,42 @@ const App = () => {
   const [mediaStreamSource, setMediaStreamSource] = useState(null);
   const [processor, setProcessor] = useState(null);
   const [audioData, setAudioData] = useState(null);
+  const [liveTime, setLiveTime] = useState(0);  // 用于存储直播时间
+  const [statusMessage, setStatusMessage] = useState('');  // 用于显示“开始直播”或“暂停直播”的状态信息
+  const [conversationId, setConversationId] = useState(null);
 
-  // 创建 WebSocket 连接并管理连接
-  const initWebSocket = () => {
-    const ws = new WebSocket('ws://localhost:8765');
-    
-    ws.onopen = () => console.log('WebSocket connected!');
-    ws.onclose = () => console.log('WebSocket connection closed.');
-    
-    ws.onmessage = (event) => {
-      const receivedAudioData = event.data;
-  console.log('Received raw audio data from server:', receivedAudioData);
-      const audioURL = URL.createObjectURL(receivedAudioData);
-      setAudioData(audioURL);
-      console.log('Received audio data from server:', audioURL);
-    };
+  const handleConversationId = (id) => {
+    setConversationId(id);
+    console.log('Received Conversation ID:', id);
+  };
+  useEffect(() => {
+    let timer;
+    if (isLive) {
+      setStatusMessage("正在直播");  // 设置状态信息为“开始直播”
+      timer = setInterval(() => setLiveTime((prev) => prev + 1), 1000);
+    } else {
+      setStatusMessage("暂停直播");  // 设置状态信息为“暂停直播”
+      clearInterval(timer);
+    }
+    return () => clearInterval(timer);
+  }, [isLive]);
 
-    setSocket(ws);
-
-    return ws;
+  const formatTime = (time) => {
+    const hours = String(Math.floor(time / 3600)).padStart(2, '0');
+    const minutes = String(Math.floor((time % 3600) / 60)).padStart(2, '0');
+    const seconds = String(time % 60).padStart(2, '0');
+    // return `${hours}:${minutes}:${seconds}`;
+    const currentTimestamp = Math.floor(Date.now()); // 当前的 Unix 时间戳（秒）
+    return currentTimestamp;
   };
 
-  // 启动 WebSocket 连接
-  useEffect(() => {
-    const ws = initWebSocket();
+  const initWebSocket = () => {
+    const ws = new WebSocket('ws://localhost:8765');
+    ws.onopen = () => console.log('WebSocket connected!');
+    ws.onclose = () => console.log('WebSocket connection closed.');
+    setSocket(ws);
+  };
 
-    return () => {
-      if (ws) ws.close();
-    };
-  }, []);
-
-  // 启动音频流
   const startAudioStream = () => {
     if (socket && socket.readyState === WebSocket.OPEN) {
       navigator.mediaDevices.getUserMedia({ audio: true })
@@ -55,7 +62,7 @@ const App = () => {
           processorInstance.onaudioprocess = (e) => {
             const audioData = e.inputBuffer.getChannelData(0);
             if (socket.readyState === WebSocket.OPEN) {
-              socket.send(audioData.buffer);
+              socket.send(audioData.buffer);  // 发送音频数据到服务器
             }
           };
 
@@ -80,6 +87,13 @@ const App = () => {
       mediaStreamSource.disconnect();
     }
   };
+
+  useEffect(() => {
+    initWebSocket();
+    return () => {
+      if (socket) socket.close();
+    };
+  }, []);
 
   const startLive = () => {
     setIsLive(true);
@@ -117,48 +131,38 @@ const App = () => {
 
         {/* 中间显示时间和消息的区域 */}
         <div className="info-container">
-          <h3>直播时间: 00:00:00</h3>
-          <p>其他信息...</p>
+          <h3>直播时间: {formatTime(liveTime)}</h3>
+          <p>{statusMessage}</p>
+          <p>当前会话 ID: {conversationId || '尚未创建'}</p>
+          <AudioRecorder onConversationId={handleConversationId} />
         </div>
 
         {/* 右侧播放视频 */}
-        <div className="video-container">
-          <video width="100%" height="100%" autoPlay controls>
-            <source src="static/2.mp4" type="video/mp4" />
-            您的浏览器不支持播放该视频。
-          </video>
-        </div>
+      <div className="video-container">
+      </div>
       </div>
 
       {/* 下半部分，功能区 */}
       <div className="bottom">
         <div className="button-row">
-          <button onClick={uploadVideo}>上传视频</button>
-          <button onClick={startLive} disabled={isLive}>开始直播</button>
-          <button onClick={pauseLive} disabled={!isLive}>暂停直播</button>
+        <VideoUploadComponent />
+        <Button colorScheme="teal"  onClick={startLive} disabled={isLive} size="lg">
+          开始直播
+        </Button>
+        <Button colorScheme="teal"  onClick={pauseLive} disabled={!isLive} size="lg">
+          暂停直播
+        </Button>
         </div>
-
         <div className="button-row">
           <select onChange={handleAudioSelect}>
             <option value="default">选择音色</option>
             <option value="voice1">音色1</option>
             <option value="voice2">音色2</option>
           </select>
-          <button onClick={downloadStream}>下载直播</button>
+          <Button colorScheme="teal"  onClick={downloadStream} size="lg">
+          下载直播
+        </Button>
         </div>
-      </div>
-
-      {/* 显示音频数据 */}
-      <div className="audio-data-container">
-        <h4>接收到的音频数据:</h4>
-        {audioData ? (
-          <audio controls preload="auto">
-            <source src={audioData} type="audio/wav" />
-            您的浏览器不支持音频播放。
-          </audio>
-        ) : (
-          <p>等待音频数据...</p>
-        )}
       </div>
     </div>
   );

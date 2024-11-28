@@ -1,155 +1,151 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState ,useRef,useEffect} from 'react';
 import VideoUploadComponent from './components/VideoUploadComponent';
-import AudioRecorder from './components/AudioRecorder';
+// import AudioRecorder from './components/AudioRecorder';
 import './App.css';
 import { Button } from '@chakra-ui/react';
+import AgoraRTC, {
+  ICameraVideoTrack,
+  IMicrophoneAudioTrack,
+  IAgoraRTCClient,
+  IAgoraRTCRemoteUser,
+} from "agora-rtc-sdk-ng";
+const client = AgoraRTC.createClient({
+  mode: "rtc",
+  codec: "vp8",
+});
+let audioTrack;
+let videoTrack;
+
 const App = () => {
+  const [statusMessage, setStatusMessage] = useState('');  
+  const [isAudioOn, setIsAudioOn] = useState(false);
+  const [isVideoOn, setIsVideoOn] = useState(false);
+  const [isAudioPubed, setIsAudioPubed] = useState(false);
+  const [isVideoPubed, setIsVideoPubed] = useState(false);
+  const [isVideoSubed, setIsVideoSubed] = useState(false);
+  const [isJoined, setIsJoined] = useState(false);
+  const [token, setToken] = useState(process.env.REACT_APP_AGORA_TOKEN || '');
+  const [appid, setAppid] = useState(process.env.REACT_APP_AGORA_APPID || '');
+  const [channel, setChannel] = useState(process.env.REACT_APP_AGORA_CHANNEL || '');
   const [isLive, setIsLive] = useState(false);
-  const [socket, setSocket] = useState(null);
-  const [audioContext, setAudioContext] = useState(null);
-  const [mediaStreamSource, setMediaStreamSource] = useState(null);
-  const [processor, setProcessor] = useState(null);
-  const [audioData, setAudioData] = useState(null);
-  const [liveTime, setLiveTime] = useState(0);  // 用于存储直播时间
-  const [statusMessage, setStatusMessage] = useState('');  // 用于显示“开始直播”或“暂停直播”的状态信息
-  const [conversationId, setConversationId] = useState(null);
 
-  const handleConversationId = (id) => {
-    setConversationId(id);
-    console.log('Received Conversation ID:', id);
-  };
-  useEffect(() => {
-    let timer;
+  const handleLiveAction = () => {
     if (isLive) {
-      setStatusMessage("正在直播");  // 设置状态信息为“开始直播”
-      timer = setInterval(() => setLiveTime((prev) => prev + 1), 1000);
+      leaveChannel()
+      turnOnMicrophone(false);
+      setIsLive(false);  
     } else {
-      setStatusMessage("暂停直播");  // 设置状态信息为“暂停直播”
-      clearInterval(timer);
-    }
-    return () => clearInterval(timer);
-  }, [isLive]);
-
-  const formatTime = (time) => {
-    const hours = String(Math.floor(time / 3600)).padStart(2, '0');
-    const minutes = String(Math.floor((time % 3600) / 60)).padStart(2, '0');
-    const seconds = String(time % 60).padStart(2, '0');
-    return `${hours}:${minutes}:${seconds}`;
-  };
-
-  const initWebSocket = () => {
-    const ws = new WebSocket('ws://localhost:8765');
-    ws.onopen = () => console.log('WebSocket connected!');
-    ws.onclose = () => console.log('WebSocket connection closed.');
-    setSocket(ws);
-  };
-
-  const startAudioStream = () => {
-    if (socket && socket.readyState === WebSocket.OPEN) {
-      navigator.mediaDevices.getUserMedia({ audio: true })
-        .then((stream) => {
-          const audioContextInstance = new (window.AudioContext || window.webkitAudioContext)();
-          setAudioContext(audioContextInstance);
-
-          const mediaStreamSourceInstance = audioContextInstance.createMediaStreamSource(stream);
-          const processorInstance = audioContextInstance.createScriptProcessor(2048, 1, 1);
-
-          mediaStreamSourceInstance.connect(processorInstance);
-          processorInstance.connect(audioContextInstance.destination);
-
-          processorInstance.onaudioprocess = (e) => {
-            const audioData = e.inputBuffer.getChannelData(0);
-            if (socket.readyState === WebSocket.OPEN) {
-              socket.send(audioData.buffer);  // 发送音频数据到服务器
-            }
-          };
-
-          setMediaStreamSource(mediaStreamSourceInstance);
-          setProcessor(processorInstance);
-        })
-        .catch((err) => {
-          console.error('Audio capture failed:', err);
-        });
+      publishAudio()
+      setIsLive(true);  
     }
   };
-
-  const stopAudioStream = () => {
-    if (audioContext) {
-      audioContext.close();
-      setAudioContext(null);
-    }
-    if (processor) {
-      processor.disconnect();
-    }
-    if (mediaStreamSource) {
-      mediaStreamSource.disconnect();
-    }
-  };
-
-  useEffect(() => {
-    initWebSocket();
-    return () => {
-      if (socket) socket.close();
-    };
-  }, []);
-
-  const startLive = () => {
-    setIsLive(true);
-    startAudioStream();
-  };
-
-  const pauseLive = () => {
-    setIsLive(false);
-    stopAudioStream();
-  };
-
-  const uploadVideo = () => {
-    console.log("Uploading video...");
-  };
-
+  //选择音色
   const handleAudioSelect = (e) => {
     console.log('Audio selected:', e.target.value);
   };
-
+  //下载视频
   const downloadStream = () => {
     console.log("Downloading stream...");
   };
 
+  const turnOnCamera = async (flag) => {
+    flag = flag ?? !isVideoOn;
+    setIsVideoOn(flag);
+    if (videoTrack) {
+      return videoTrack.setEnabled(flag);
+    }
+    videoTrack = await AgoraRTC.createCameraVideoTrack();
+    videoTrack.play("camera-video");
+  };
+
+  const turnOnMicrophone = async (flag) => {
+    flag = flag ?? !isAudioOn;
+    setIsAudioOn(flag);
+    if (audioTrack) {
+      return audioTrack.setEnabled(flag);
+    }
+    audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+    // audioTrack.play();
+  };
+
+  const joinChannel = async () => {
+    if (isJoined) {
+      await leaveChannel();
+    }
+    client.on("user-published", onUserPublish);
+    await client.join(
+      appid,
+      channel,
+      token || null,
+      null
+    );
+    setIsJoined(true);
+  };
+
+  const leaveChannel = async () => {
+    setIsJoined(false);
+    setIsAudioPubed(false);
+    setIsVideoPubed(false);
+    await client.leave();
+  };
+  const onUserPublish = async (
+    user,
+    mediaType
+  ) => {
+    if (mediaType === "video") {
+      const remoteTrack = await client.subscribe(user, mediaType);
+      remoteTrack.play("remote-video");
+      setIsVideoSubed(true);
+    }
+    if (mediaType === "audio") {
+      const remoteTrack = await client.subscribe(user, mediaType);
+      remoteTrack.play();
+    }
+  };
+
+  const publishAudio = async () => {
+    await turnOnMicrophone(true);
+    if (!isJoined) {
+      await joinChannel();
+    }
+    await client.publish(audioTrack);
+    setIsAudioPubed(true);
+  };
   return (
     <div className="container">
-      {/* 上半部分，4/5 屏幕 */}
       <div className="top">
-        {/* 左侧播放视频 */}
         <div className="video-container">
-          <video width="100%" height="100%" autoPlay controls>
+          {/* <video width="100%" height="100%" autoPlay controls>
             <source src="static/1.mp4" type="video/mp4" />
             您的浏览器不支持播放该视频。
-          </video>
+          </video> */}
+          <video id="remote-video" hidden={isVideoOn ? false : true}></video>
         </div>
-
-        {/* 中间显示时间和消息的区域 */}
         <div className="info-container">
-          <h3>直播时间: {formatTime(liveTime)}</h3>
+          <h3>直播时间: {}</h3>
           <p>{statusMessage}</p>
-          <p>当前会话 ID: {conversationId || '尚未创建'}</p>
-          <AudioRecorder onConversationId={handleConversationId} />
         </div>
-
-        {/* 右侧播放视频 */}
       <div className="video-container">
+      <video id="camera-video" hidden={isVideoOn ? false : true}></video>
       </div>
       </div>
-
-      {/* 下半部分，功能区 */}
       <div className="bottom">
         <div className="button-row">
         <VideoUploadComponent />
-        <Button colorScheme="teal"  onClick={startLive} disabled={isLive} size="lg">
-          开始直播
+        <Button colorScheme="teal"    onClick={() => turnOnCamera()}
+            className={isVideoOn ? "button-on" : ""}  size="lg">
+          测试Turn {isAudioOn ? "off" : "on"} camera
         </Button>
-        <Button colorScheme="teal"  onClick={pauseLive} disabled={!isLive} size="lg">
-          暂停直播
-        </Button>
+        {/* <Button colorScheme="teal"   onClick={() => turnOnMicrophone()}  size="lg">
+         {isAudioOn ? "打开" : "关闭"} Microphone
+        </Button> */}
+        <Button
+        colorScheme="teal"
+        onClick={handleLiveAction}
+        size="lg"
+      >
+        {isLive ? '结束直播' : '开始直播'} {/* 根据状态显示按钮文本 */}
+       </Button>
         </div>
         <div className="button-row">
           <select onChange={handleAudioSelect}>

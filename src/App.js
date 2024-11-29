@@ -17,28 +17,15 @@ let audioTrack;
 let videoTrack;
 
 const App = () => {
+  const [IsJoined, setIsJoined] = useState(false);  
   const [statusMessage, setStatusMessage] = useState('');  
   const [isAudioOn, setIsAudioOn] = useState(false);
   const [isVideoOn, setIsVideoOn] = useState(false);
-  const [isAudioPubed, setIsAudioPubed] = useState(false);
-  const [isVideoPubed, setIsVideoPubed] = useState(false);
-  const [isVideoSubed, setIsVideoSubed] = useState(false);
-  const [isJoined, setIsJoined] = useState(false);
-  const [token, setToken] = useState(process.env.REACT_APP_AGORA_TOKEN || '');
+  const [token, setToken] = useState('007eJxTYOD+vWOJw5b5t2dKNGy7vfLxkS5OOas/mVtfnr1rumoud1i2AoOFWVKSoaWRYXJyqpmJhaFlYpp5snGyoXFiSmJSkpFp0s5Kz/SGQEYGxtspTEASDEF8FoaS1OISBgYAEvAh1w==');
   const [appid, setAppid] = useState(process.env.REACT_APP_AGORA_APPID || '');
   const [channel, setChannel] = useState(process.env.REACT_APP_AGORA_CHANNEL || '');
   const [isLive, setIsLive] = useState(false);
 
-  const handleLiveAction = () => {
-    if (isLive) {
-      leaveChannel()
-      turnOnMicrophone(false);
-      setIsLive(false);  
-    } else {
-      publishAudio()
-      setIsLive(true);  
-    }
-  };
   //选择音色
   const handleAudioSelect = (e) => {
     console.log('Audio selected:', e.target.value);
@@ -47,7 +34,6 @@ const App = () => {
   const downloadStream = () => {
     console.log("Downloading stream...");
   };
-
   const turnOnCamera = async (flag) => {
     flag = flag ?? !isVideoOn;
     setIsVideoOn(flag);
@@ -57,37 +43,30 @@ const App = () => {
     videoTrack = await AgoraRTC.createCameraVideoTrack();
     videoTrack.play("camera-video");
   };
-
-  const turnOnMicrophone = async (flag) => {
-    flag = flag ?? !isAudioOn;
-    setIsAudioOn(flag);
-    if (audioTrack) {
-      return audioTrack.setEnabled(flag);
+ const handleLiveAction1=async () => {
+      if (isLive) {
+        client.leave();
+        setIsLive(false);
+        audioTrack.setEnabled(false);
+    }else{
+        //step1: joinChannel
+        client.on("user-published", onUserPublish);
+        try {  
+          // 加入频道
+          await client.join(appid, channel, token || null, null);
+        } catch (error) {
+          alert("Error joining the channel or handling user-published event:", error);
+          return
+        }
+        setIsJoined(true);
+        //step2: turnOnMicrophone
+        audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
+        audioTrack.setEnabled(true);
+        //step3: publish audio
+        client.publish(audioTrack);
+        setIsLive(true);
     }
-    audioTrack = await AgoraRTC.createMicrophoneAudioTrack();
-    // audioTrack.play();
-  };
-
-  const joinChannel = async () => {
-    if (isJoined) {
-      await leaveChannel();
-    }
-    client.on("user-published", onUserPublish);
-    await client.join(
-      appid,
-      channel,
-      token || null,
-      null
-    );
-    setIsJoined(true);
-  };
-
-  const leaveChannel = async () => {
-    setIsJoined(false);
-    setIsAudioPubed(false);
-    setIsVideoPubed(false);
-    await client.leave();
-  };
+}
   const onUserPublish = async (
     user,
     mediaType
@@ -95,7 +74,7 @@ const App = () => {
     if (mediaType === "video") {
       const remoteTrack = await client.subscribe(user, mediaType);
       remoteTrack.play("remote-video");
-      setIsVideoSubed(true);
+      // setIsVideoSubed(true);
     }
     if (mediaType === "audio") {
       const remoteTrack = await client.subscribe(user, mediaType);
@@ -103,13 +82,9 @@ const App = () => {
     }
   };
 
-  const publishAudio = async () => {
-    await turnOnMicrophone(true);
-    if (!isJoined) {
-      await joinChannel();
-    }
-    await client.publish(audioTrack);
-    setIsAudioPubed(true);
+  //填写临时token
+  const handleTokenChange = (e) => {
+    setToken(e.target.value);
   };
   return (
     <div className="container">
@@ -123,6 +98,14 @@ const App = () => {
         </div>
         <div className="info-container">
           <h3>直播时间: {}</h3>
+        <label htmlFor="token">临时Token:</label>
+        <input
+          id="token"
+          type="password"
+          value={token}
+          onChange={handleTokenChange}
+          placeholder="请输入Token"
+        />
           <p>{statusMessage}</p>
         </div>
       <div className="video-container">
@@ -132,19 +115,16 @@ const App = () => {
       <div className="bottom">
         <div className="button-row">
         <VideoUploadComponent />
-        <Button colorScheme="teal"    onClick={() => turnOnCamera()}
+        {/* <Button colorScheme="teal"    onClick={() => turnOnCamera()}
             className={isVideoOn ? "button-on" : ""}  size="lg">
           测试Turn {isAudioOn ? "off" : "on"} camera
-        </Button>
-        {/* <Button colorScheme="teal"   onClick={() => turnOnMicrophone()}  size="lg">
-         {isAudioOn ? "打开" : "关闭"} Microphone
         </Button> */}
         <Button
         colorScheme="teal"
-        onClick={handleLiveAction}
+        onClick={handleLiveAction1}
         size="lg"
       >
-        {isLive ? '结束直播' : '开始直播'} {/* 根据状态显示按钮文本 */}
+        {isLive ? '结束直播' : '开始直播'} 
        </Button>
         </div>
         <div className="button-row">

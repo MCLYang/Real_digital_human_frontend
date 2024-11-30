@@ -34,25 +34,25 @@ const App = () => {
   const downloadStream = () => {
     console.log("Downloading stream...");
   };
-  const turnOnCamera = async (flag) => {
-    flag = flag ?? !isVideoOn;
-    setIsVideoOn(flag);
-    if (videoTrack) {
-      return videoTrack.setEnabled(flag);
-    }
-    videoTrack = await AgoraRTC.createCameraVideoTrack();
-    videoTrack.play("camera-video");
-  };
- const handleLiveAction1=async () => {
+  // const turnOnCamera = async (flag) => {
+  //   flag = flag ?? !isVideoOn;
+  //   setIsVideoOn(flag);
+  //   if (videoTrack) {
+  //     return videoTrack.setEnabled(flag);
+  //   }
+  //   videoTrack = await AgoraRTC.createCameraVideoTrack();
+  //   videoTrack.play("camera-video");
+  // };
+ const handleLiveAction=async () => {
       if (isLive) {
         client.leave();
         setIsLive(false);
+        setIsVideoOn(false);
         audioTrack.setEnabled(false);
     }else{
         //step1: joinChannel
         client.on("user-published", onUserPublish);
         try {  
-          // 加入频道
           await client.join(appid, channel, token || null, null);
         } catch (error) {
           alert("Error joining the channel or handling user-published event:", error);
@@ -65,6 +65,7 @@ const App = () => {
         //step3: publish audio
         client.publish(audioTrack);
         setIsLive(true);
+        setIsVideoOn(true);
     }
 }
   const onUserPublish = async (
@@ -94,7 +95,6 @@ const App = () => {
             <source src="static/1.mp4" type="video/mp4" />
             您的浏览器不支持播放该视频。
           </video> */}
-          <video id="remote-video" hidden={isVideoOn ? false : true}></video>
         </div>
         <div className="info-container">
           <h3>直播时间: {}</h3>
@@ -109,7 +109,8 @@ const App = () => {
           <p>{statusMessage}</p>
         </div>
       <div className="video-container">
-      <video id="camera-video" hidden={isVideoOn ? false : true}></video>
+      <video id="remote-video" hidden={isVideoOn ? false : true}></video>
+      {/* <video id="camera-video" hidden={isVideoOn ? false : true}></video> */}
       </div>
       </div>
       <div className="bottom">
@@ -121,7 +122,7 @@ const App = () => {
         </Button> */}
         <Button
         colorScheme="teal"
-        onClick={handleLiveAction1}
+        onClick={handleLiveAction}
         size="lg"
       >
         {isLive ? '结束直播' : '开始直播'} 

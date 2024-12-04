@@ -6,12 +6,12 @@
 }
 .top {
   display: flex;
-  min-height: 40%;
+  min-height: 50%;
 }
 
 .video-container {
-  width: 40%;
-
+  width: 45%;
+  margin:0 auto;
   border: 10px solid rgb(214, 214, 214);
   border-radius: 20px;
 }
@@ -24,15 +24,6 @@
   text-align: center;
 }
 
-.bottom {
-  display: flex;
-  flex: 2;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background-color: #fff;
-  padding: 20px;
-}
 
 .button-row {
   display: flex;
@@ -51,4 +42,8 @@ button, select {
 button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
+}
+.info-container{
+  margin: 0 auto;
+  /* background-color: red; */
 }

@@ -1,0 +1,21 @@
+.videoURL label{
+   float: left;
+   font-size: 24px;
+   margin-bottom: 5px;
+}
+.videoURL input{
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #cacaca;
+  border-radius: 5px;
+  margin-bottom: 10px;
+}
+.audioSource label{
+    float: left;
+    font-size: 24px;
+}
+.audioSource select{
+  width: 100%;
+    padding: 10px 0;
+    margin: 8px 0;
+}

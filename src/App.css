@@ -6,32 +6,27 @@
 }
 .top {
   display: flex;
-  min-height: 40%;
+  min-height: 528px;
 }
 
 .video-container {
-  width: 40%;
-
+  /* width: 45%; */
+  min-width: 528px;
+  margin:0 auto;
   border: 10px solid rgb(214, 214, 214);
   border-radius: 20px;
 }
 .video-container video {
+  height: 100%;
   width: 100%;
 }
 .info-container {
+  /* top: 50%; */
   width: 20%;
   padding: 20px;
   text-align: center;
-}
-
-.bottom {
-  display: flex;
-  flex: 2;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background-color: #fff;
-  padding: 20px;
+  min-width: 528px;
+  margin: 0 auto;
 }
 
 .button-row {
@@ -46,9 +41,8 @@ button, select {
   margin: 5px;
   font-size: 16px;
   cursor: pointer;
-}
-
 button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
+}
 }

@@ -54,7 +54,7 @@ const App = () => {
       // Step1: joinChannel
       client.on("user-published", onUserPublish);
       try {
-        await client.join(appid, channelData.channel_id, channelData.token, channelData.uid);
+        await client.join(appid, channelData.channel_id, channelData.token, Number(channelData.uid));
       } catch (error) {
         alert("Error joining the channel or handling user-published event:", error);
         return;

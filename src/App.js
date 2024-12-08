@@ -15,10 +15,10 @@ const App = () => {
   const [isJoined, setIsJoined] = useState(false);  
   const [isAudioOn, setIsAudioOn] = useState(false);
   const [isVideoOn, setIsVideoOn] = useState(false);
-  const [token, setToken] = useState(process.env.REACT_APP_AGORA_TOKEN ||'007eJxTYGCY1Z7/9eSKU4FfX0zOc14lubdy6SfmVO39a+NWs0dvn7lZgcHCLCnJ0NLIMDk51czEwtAyMc082TjZ0DgxJTEpycg0SdIrML0hkJGhe70LMyMDBIL4LAwlqcUlDAwAz1QgvA==');
+ // const [token, setToken] = useState(process.env.REACT_APP_AGORA_TOKEN ||'007eJxTYGCY1Z7/9eSKU4FfX0zOc14lubdy6SfmVO39a+NWs0dvn7lZgcHCLCnJ0NLIMDk51czEwtAyMc082TjZ0DgxJTEpycg0SdIrML0hkJGhe70LMyMDBIL4LAwlqcUlDAwAz1QgvA==');
   const [appid, setAppid] = useState(process.env.REACT_APP_AGORA_APPID || '');
 
-  const [channel, setChannel] = useState(process.env.REACT_APP_AGORA_CHANNEL || '');
+ // const [channel, setChannel] = useState(process.env.REACT_APP_AGORA_CHANNEL || '');
   const [isLive, setIsLive] = useState(false);
   const [isChannelCreated, setIsChannelCreated] = useState(false);
   const [selectedDeviceId, setSelectedDeviceId] = useState('');

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Space, Table, Tag,Typography } from 'antd';
+import {  Table, Tag,Typography } from 'antd';
 const columns = [
   {
     title: 'Time',
@@ -48,16 +48,6 @@ const columns = [
     dataIndex: 'User',
    
   },
-  // {
-  //   title: 'Action',
-  //   key: 'action',
-  //   render: (_, record) => (
-  //     <Space size="middle">
-  //       <a>Add {record.name}</a>
-  //       <a>Delete</a>
-  //     </Space>
-  //   ),
-  // },
 ];
 const data = [
   {
@@ -89,20 +79,23 @@ const data = [
     User: "joy",
   },
 ];
-const ViewTraningPage = () => 
-<Table
- columns={columns}
- dataSource={data}
- title={()=>{return (
-       <Typography.Title
-       level={1}
-       style={{
-         margin: 0,
-       }}
-     >
-      Training Dashboard
-     </Typography.Title>
-   )}
+const ViewTraningPage = () => {
+  return (
+    <>
+      <Typography.Title
+        level={1}
+        style={{
+          marginBottom: 30,
+        }}
+      >
+        Training Dashboard
+      </Typography.Title>
+      <Table
+        columns={columns}
+        dataSource={data}
+        />
+    </>
+  );
 }
- />;
+
 export default ViewTraningPage;

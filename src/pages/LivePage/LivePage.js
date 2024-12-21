@@ -101,18 +101,10 @@ const LivePage = () => {
           cursor: 'pointer',  // 鼠标悬停时显示为手型
         }} />
         </Header>
-      <Content
-        style={{
-          margin: '24px 16px 0',
-        }}
-      >
+      <Content>
       <Splitter
         style={{
-          minHeight: 700,
-          boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
           backgroundColor: colorBgContainer,
-          borderRadius: borderRadiusLG,
-          
         }}
       >
         <Splitter.Panel defaultSize="50%" min="50%" max="50%">

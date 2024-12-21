@@ -10,9 +10,12 @@ const LoginPage = () => {
     const password = e.target.password.value;
 
     // 模拟登录逻辑
-    if (Account === "admin" && password === "123456") {
-      // navigate("/home"); // 跳转到主页面
-      navigate("/admin/dashboard"); // 跳转到主页面
+    if ( password === "123456") {
+      if(Account === "admin")
+        navigate("/admin/dashboard"); // 跳转到主页面
+      else
+       navigate("/home"); // 跳转到主页面
+
     } else {
       alert("用户名或密码错误！");
     }
@@ -21,12 +24,10 @@ const LoginPage = () => {
   return (
     <div
       style={{
+        paddingTop: "15%",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
-        height: "100vh",
-        padding: "20px",
       }}
     >
       <form onSubmit={handleLogin} style={{ width: "100%", maxWidth: "400px" }}>

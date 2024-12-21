@@ -3,36 +3,23 @@ import { Layout, theme, Col, Row ,Typography} from 'antd';
 import CharacterCard from '../components/Card/CharacterCard';
 
 const {Header, Content } = Layout;
-
-// 生成每行的卡片列
-const generateCharacterRows = (cardData, cardsPerRow) => {
-  const totalCards = cardData.length;
-  const rows = [];
-  // 通过循环来分割卡片数据为每行指定的列数
-  for (let i = 0; i < totalCards; i += cardsPerRow) {
-    const currentRowData = cardData.slice(i, i + cardsPerRow);
-    rows.push(
-      <Row key={i} gutter={[16, 16]}>
-        {currentRowData.map((card, index) => (
-          <Col
-            key={index}
-            xs={{ span: 5, offset: index === 0 ? 0 : 1 }}  
-            lg={{ span: 3, offset: index === 0 ? 0 : 1 }}
-          >
-            {/* 传递 modelId 到 CharacterCard */}
-            <CharacterCard src={card.src} modelName={card.modelName} modelId={card.modelId} />
-          </Col>
-        ))}
-      </Row>
-    );
-  }
-  return rows;
-};
-
+const generateCharacterRows = (cardData) => (
+  <Row gutter={[15,15]}>
+    {cardData.map((card, index) => (
+      <Col 
+        key={card.avatarId} 
+        span={3} 
+        style={{ textAlign: 'center' }}
+      >
+       <CharacterCard src={card.src} modelName={card.modelName} modelId={card.modelId} />
+      </Col>
+    ))}
+  </Row>
+);
 
 const HomePage = () => {
   const {
-    token: { colorBgContainer, borderRadiusLG },
+    token: { colorBgContainer },
   } = theme.useToken();
   const cardData = [
     { src: 'https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png', modelName: '@Europe Street beat', modelId: 1 },
@@ -49,27 +36,22 @@ const HomePage = () => {
     { src: 'https://os.alipayobjects.com/rmsportal/QBnOOoLaAfKPirc.png', modelName: '@Berlin', modelId: 12 },
   ];
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout >
         <Header
           style={{
             background: colorBgContainer,
           }}
         />
-        <Content
-          style={{
-            margin: '24px 16px 0',
-          }}
-        >
+        <Content>
           <div
             style={{
               padding: 24,
-              minHeight: 700,
               background: colorBgContainer,
-              borderRadius: borderRadiusLG,
+            
             }}
           >
             {/* 标题 */}
-            <Row >        
+            <Row gutter={[0,15]}>        
               <Col
                 xs={{ span: 6, offset: 9 }}
                 lg={{ span:6, offset: 9 }}

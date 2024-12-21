@@ -4,38 +4,26 @@ import CharacterLiveCard from '../components/Card/CharacterLiveCard';
 import { useParams,useNavigate } from 'react-router-dom';
 import  { ArrowLeftOutlined} from '@ant-design/icons';
 const {Header, Content } = Layout;
-
-
-const generateCharacterRows = (cardData, cardsPerRow) => {
-  const totalCards = cardData.length;
-  const rows = [];
-
-  for (let i = 0; i < totalCards; i += cardsPerRow) {
-    const currentRowData = cardData.slice(i, i + cardsPerRow);
-    rows.push(
-      <Row key={i} gutter={[16, 16]}>
-        {currentRowData.map((card, index) => (
-          <Col
-            key={index}
-            xs={{ span: 5, offset: index === 0 ? 0 : 1 }}  // 第一个Col没有offset
-            lg={{ span: 3, offset: index === 0 ? 0 : 1 }}  // 第一个Col没有offset
-          >
-            <CharacterLiveCard
-              src={card.src}
-              modelName={card.modelName}
-              modelId={card.modelId}
-              liveId={card.liveId}
-              liveName={card.liveName}
-            />
-          </Col>
-        ))}
-      </Row>
-    );
-  }
-
-  return rows;
-};
-
+const generateCharacterRows = (cardData) => (
+  <Row gutter={[15,15]}>
+    {cardData.map((card, index) => (
+      <Col 
+        key={card.avatarId} 
+        span={3} 
+        // offset={index % 6 === 0 ? 0: 1}  // 每一排的第一个不偏移，其他的使用偏移
+        style={{ textAlign: 'center' }}
+      >
+      <CharacterLiveCard
+        src={card.src}
+        modelName={card.modelName}
+        modelId={card.modelId}
+        liveId={card.liveId}
+        liveName={card.liveName}
+      />
+      </Col>
+    ))}
+  </Row>
+);
 
 const CharacterDetail = () => {
   const { modelName,modelId } = useParams();  
@@ -59,7 +47,7 @@ const CharacterDetail = () => {
       navigate(-1);
     };
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout >
       <Layout>
       <Header
           style={{
@@ -77,17 +65,11 @@ const CharacterDetail = () => {
           cursor: 'pointer',  // 鼠标悬停时显示为手型
         }} />
       </Header>
-        <Content
-          style={{
-            margin: '24px 16px 0 16px',
-          }}
-        >
+        <Content>
           <div
             style={{
               padding: 24,
-              minHeight:700,
               background: colorBgContainer,
-              borderRadius: borderRadiusLG,
             }}
           >
           {/* 标题 */}

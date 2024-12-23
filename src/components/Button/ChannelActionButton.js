@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { Button } from "@chakra-ui/react";
 import axios from "axios";
 
-const ChannelAction = ({ onChannelDataChange }) => {
+const ChannelActionButton = ({ onChannelDataChange }) => {
+  const [apiBaseUrl, setApiBaseUrl] = useState(process.env.REACT_APP_API_BASE_URL );
   const [isCreateChannel, setIsCreateChannel] = useState(false); // 是否创建频道
   const [channelData, setChannelData] = useState({
     channel_id: "",
@@ -18,7 +19,7 @@ const ChannelAction = ({ onChannelDataChange }) => {
           return;
         }
         const response = await axios.get(
-          `http://13.212.91.127/close_channel?channel_id=${channelData.channel_id}`
+          `${apiBaseUrl}/close_channel?channel_id=${channelData.channel_id}`
         );
         console.log("关闭频道响应：", response.data);
         setChannelData({ channel_id: "", token: "", uid: "" });
@@ -30,7 +31,7 @@ const ChannelAction = ({ onChannelDataChange }) => {
     } else {
       // 创建频道逻辑
       try {
-        const response = await axios.get("http://13.212.91.127/get_channel");
+        const response = await axios.get(`${apiBaseUrl}/get_channel`);
         const { channel_id, token, uid } = response.data;
         console.log("创建频道响应：", response.data);
         setChannelData({ channel_id, token, uid });
@@ -53,4 +54,4 @@ const ChannelAction = ({ onChannelDataChange }) => {
   );
 };
 
-export default ChannelAction;
+export default ChannelActionButton;

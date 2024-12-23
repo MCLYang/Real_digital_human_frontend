@@ -13,14 +13,12 @@ const MediaSourceForm = ({ onDeviceIdChange }) => {
       const devices = await AgoraRTC.getMicrophones();
       console.log(devices);
       setMicrophones(devices);
-
       // 设置第一个设备为默认选择项（如果存在设备）
       if (devices.length > 0) {
         setSelectedAudioSource(devices[0].deviceId);
         onDeviceIdChange(devices[0].deviceId);  // 初始时传递给父组件
       }
     };
-
     getMicrophones();
   }, [onDeviceIdChange]); // 依赖 onDeviceIdChange 确保只有在父组件传入回调时加载设备
 

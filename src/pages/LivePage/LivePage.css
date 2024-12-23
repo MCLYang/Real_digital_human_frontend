@@ -1,0 +1,23 @@
+.videoContainer{
+    height: 500px;
+    min-width: 500px;
+    max-width: 80%;
+    background-color: black;
+    margin: 10% auto 0  auto;
+    border: 10px solid rgb(230, 227, 227);
+    border-radius: 20px;
+}
+
+.videoContainer video{
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+}
+.lableName{
+    margin: 0 auto 0  48%;
+}
+/* 底部按钮的样式 */
+.BottomButton{
+    margin: 20px auto 0 auto;
+    width: 50%;
+}

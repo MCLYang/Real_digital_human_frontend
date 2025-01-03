@@ -1,43 +1,75 @@
-import React, { useState } from 'react';
-import { Layout, Menu, theme } from 'antd';
-import { PieChartOutlined, DesktopOutlined } from '@ant-design/icons';
-import { Link,Outlet } from 'react-router-dom'; 
+import React, { useState, useEffect } from "react";
+import { Layout, Menu, theme } from "antd";
+import { PieChartOutlined, DesktopOutlined } from "@ant-design/icons";
+import { Link, Outlet, useLocation } from "react-router-dom";
 
-const { Content, Sider,Header } = Layout;
+const { Content, Sider, Header } = Layout;
 
 const items = [
-  { label: 'View Training Process', key: 'viewTraining', icon: <PieChartOutlined /> },
-  { label: 'Create Avatar Template', key: 'createAvatar', icon: <DesktopOutlined /> },
-  { label: 'Create Creator', key: 'createCreator', icon: <DesktopOutlined /> },
+  {
+    label: "View Training Process",
+    key: "viewTraining",
+    icon: <PieChartOutlined />,
+  },
+  {
+    label: "Create Avatar Template",
+    key: "createAvatar",
+    icon: <DesktopOutlined />,
+  },
+  { label: "Create Creator", key: "createCreator", icon: <DesktopOutlined /> },
 ];
 
 const AdminDashboardpage = () => {
+  const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
-  const [selectedKey, setSelectedKey] = useState('viewTraining'); // 默认选中第一个菜单项
+
+  // 获取当前路径并验证是否为有效的菜单项
+  const getValidKey = (path) => {
+    return items.some((item) => item.key === path) ? path : "viewTraining";
+  };
+
+  // 初始化时，如果是根路径 /admin/dashboard，则默认选中 viewTraining
+  const initialPath = location.pathname.split("/").pop();
+  const [selectedKey, setSelectedKey] = useState(
+    location.pathname === "/admin/dashboard"
+      ? "viewTraining"
+      : getValidKey(initialPath)
+  );
+
+  // 当路径变化时更新selectedKey
+  useEffect(() => {
+    const path = location.pathname.split("/").pop();
+    setSelectedKey(getValidKey(path));
+  }, [location.pathname]);
+
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
-
 
   const handleMenuClick = (e) => {
     setSelectedKey(e.key);
   };
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-    
-      <Sider collapsible collapsed={collapsed} onCollapse={setCollapsed} width={250}>
-      <div className="demo-logo-vertical" style={{backgroundColor:"#002140",height:50}} ></div>
+    <Layout style={{ minHeight: "100vh" }}>
+      <Sider
+        collapsible
+        collapsed={collapsed}
+        onCollapse={setCollapsed}
+        width={250}
+      >
+        <div
+          className="demo-logo-vertical"
+          style={{ backgroundColor: "#002140", height: 50 }}
+        ></div>
         <Menu
           theme="dark"
           mode="inline"
-          defaultSelectedKeys={['viewTraining']}
-          selectedKeys={[selectedKey]}  
+          selectedKeys={[selectedKey]}
           onClick={handleMenuClick}
         >
-          {items.map(item => (
+          {items.map((item) => (
             <Menu.Item key={item.key} icon={item.icon}>
-              {/* 路由导航 */}
               <Link to={`/admin/dashboard/${item.key}`}>{item.label}</Link>
             </Menu.Item>
           ))}
@@ -45,23 +77,22 @@ const AdminDashboardpage = () => {
       </Sider>
 
       <Layout>
-      <Header
+        <Header
           style={{
             padding: 0,
-            height:50,
+            height: 50,
             background: colorBgContainer,
           }}
         />
-        <Content >
+        <Content>
           <div
             style={{
               padding: 24,
-              minHeight: '100%',
+              minHeight: "100%",
               background: colorBgContainer,
               borderRadius: borderRadiusLG,
             }}
           >
-            {/* 渲染匹配的子路由 */}
             <Outlet />
           </div>
         </Content>
